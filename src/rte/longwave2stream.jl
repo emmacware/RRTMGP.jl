@@ -27,13 +27,15 @@ function rte_lw_2stream_solve!(
     device::ClimaComms.AbstractCPUDevice,
     flux::FluxLW,
     flux_lw::FluxLW,
+    flux_up_arr::AbstractMatrix,
+    flux_dn_arr::AbstractMatrix,
     src_lw::SourceLW2Str,
     bcs_lw::LwBCs,
     op::TwoStream,
     as::AtmosphericState,
     lookup_lw::LookUpLW,
     lookup_lw_cld::Union{LookUpCld, Nothing} = nothing,
-    lookup_lw_aero::Union{LookUpAerosolMerra, Nothing} = nothing,
+    lookup_lw_aero::Union{LookUpAerosolMerra, Nothing} = nothing,    
 )
     nlay, ncol = AtmosphericStates.get_dims(as)
     nlev = nlay + 1
@@ -64,6 +66,8 @@ function rte_lw_2stream_solve!(
                 )
                 compute_optical_props!(op, as, src_lw, gcol, igpt, lookup_lw, lookup_lw_cld, lookup_lw_aero)
                 rte_lw_2stream!(op, flux, src_lw, bcs_lw, gcol, igpt, ibnd, nlev, ncol)
+                flux_up_arr[:,ibnd] += flux_up[:,gcol]
+                flux_dn_arr[:,ibnd] += flux_dn[:,gcol]
                 if igpt == 1
                     map!(x -> x, view(flux_up_lw, :, gcol), view(flux_up, :, gcol))
                     map!(x -> x, view(flux_dn_lw, :, gcol), view(flux_dn, :, gcol))

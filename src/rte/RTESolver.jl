@@ -107,13 +107,15 @@ corresponding factor to account for column expansion in `deep-atmosphere` config
 """
 function solve_lw!(
     (; context, fluxb, flux, src, bcs, op)::TwoStreamLWRTE,
+    flux_up_arr::AbstractMatrix,
+    flux_dn_arr::AbstractMatrix,
     as::AtmosphericState,
     lookup_lw::LookUpLW,
     lookup_lw_cld::Union{LookUpCld, Nothing} = nothing,
     lookup_lw_aero::Union{LookUpAerosolMerra, Nothing} = nothing,
     metric_scaling::M = nothing,
 ) where {M}
-    rte_lw_2stream_solve!(context.device, fluxb, flux, src, bcs, op, as, lookup_lw, lookup_lw_cld, lookup_lw_aero)
+    rte_lw_2stream_solve!(context.device, fluxb, flux, flux_up_arr, flux_dn_arr, src, bcs, op, as, lookup_lw, lookup_lw_cld, lookup_lw_aero)
     apply_metric_scaling!(flux, metric_scaling)
 end
 
